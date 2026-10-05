@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Mount Wöhe - Die Abrechnung</title>
+  <style>
+    /* Reset & Basis-Styling */
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #1a1a1a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .mobile-warning {
+      display: none;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      font-size: 1.2rem;
+    }
+
+    .mountain-container {
+      width: 1200px;
+      height: 800px;
+      position: relative;
+      background: #000;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 1250px) {
+      .mountain-container { display: none; }
+      .mobile-warning { display: block; }
+    }
+
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* --- LOGIN OVERLAY --- */
+    #login-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(8px);
+    }
+    .login-box {
+      background: rgba(30, 30, 45, 0.9);
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      text-align: center;
+      width: 320px;
+    }
+    .login-box h2 { margin-bottom: 20px; font-size: 1.4rem; }
+    .login-box select, .login-box input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background: #2ed573;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .login-error { color: #ff4757; font-size: 0.9rem; margin-top: 10px; display: none; }
+
+    /* --- DIE INDIVIDUELLEN FLAGGEN --- */
+    .player-flag {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 5;
+      offset-path: path("M 300 800 L 800 550 L 450 400 L 700 250 L 600 150");
+      offset-rotate: 0deg; 
+      font-size: 1.1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .player-flag span {
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: bold;
+      margin-left: 2px;
+      margin-right: 2px;
+      vertical-align: middle;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .flag-du { transform: translate(2px, -100%); }
+    .flag-du span { background: rgba(0, 210, 255, 0.8); box-shadow: 0 0 5px rgba(0, 210, 255, 0.5); }
+
+    .flag-kom { transform: translate(calc(-100% - 2px), -100%); }
+    .flag-kom span { background: rgba(255, 71, 87, 0.8); box-shadow: 0 0 5px rgba(255, 71, 87, 0.5); }
+
+    /* --- DIE KLETTER-PUNKTE --- */
+    .point {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 10;
+      offset-path: path("M 300 800 L 800 550 L 450 400 L 700 250 L 600 150");
+      offset-rotate: 0deg;
+      transition: offset-distance 1.5s ease-in-out; 
+      offset-distance: 0%;
+      transform: translate(-50%, -50%);
+    }
+
+    .player-du { background-color: #00d2ff; box-shadow: 0 0 15px #00d2ff; margin-top: -3px; }
+    .player-kom { background-color: #ff4757; box-shadow: 0 0 15px #ff4757; margin-top: 3px; }
+
+    /* --- UI DASHBOARDS --- */
+    .dashboard {
+      position: absolute;
+      top: 30px;
+      width: 290px;
+      background: rgba(20, 20, 30, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .dash-du { left: 30px; border-top: 4px solid #00d2ff; }
+    .dash-kom { right: 30px; border-top: 4px solid #ff4757; }
+
+    .dash-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .dash-du .dash-title { color: #00d2ff; }
+    .dash-kom .dash-title { color: #ff4757; }
+
+    .stats {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .highlight { font-weight: bold; font-size: 1.3rem; }
+    .secret-beers { font-size: 1.8rem; letter-spacing: 2px; margin-top: 10px; min-height: 35px; }
+
+    .input-group { display: flex; gap: 10px; margin-bottom: 10px; }
+
+    input[type="number"] {
+      width: 70px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1rem;
+      text-align: center;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    
+    .btn-add { background: #2ed573; color: #000; flex-grow: 1; }
+    .btn-add:hover { background: #26b360; }
+    
+    .btn-undo { background: #576574; color: #fff; width: 100%; font-size: 0.9rem; }
+    .btn-undo:hover { background: #4b5763; }
+
+    /* Gesperrt-Status für den fremden Bereich */
+    .locked input, .locked button { opacity: 0.3; pointer-events: none; }
+
+    .dev-test-btn {
+      position: absolute; bottom: 10px; right: 10px;
+      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3);
+      border: none; font-size: 0.8rem; cursor: pointer; z-index: 50;
+    }
+    .dev-test-btn:hover { background: rgba(255,255,255,0.3); color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-warning">Bitte Desktop-Ansicht verwenden (>1250px).</div>
+
+  <!-- LOGIN POPUP -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <h2>Wer bist du?</h2>
+      <select id="login-user">
+        <option value="du">Maximus Prokrastinatus</option>
+        <option value="kom">Studicus Suboptimalus</option>
+      </select>
+      <input type="password" id="login-pin" placeholder="PIN eingeben">
+      <button onclick="tryLogin()">Einloggen</button>
+      <div id="login-error" class="login-error">Falsche PIN!</div>
+    </div>
+  </div>
+
+  <div class="mountain-container" id="mountain">
+    
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2b5876" />
+          <stop offset="100%" stop-color="#4e4376" />
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="800" fill="url(#sky)" />
+      <polygon points="-100,800 300,350 700,800" fill="#34495e" opacity="0.8" />
+      <polygon points="500,800 950,250 1400,800" fill="#2c3e50" opacity="0.8" />
+      <polygon points="100,800 600,150 600,800" fill="#4a69bd" />
+      <polygon points="600,150 1100,800 600,800" fill="#1e3799" />
+      <polygon points="450,390 600,150 600,430 520,430" fill="#ffffff" />
+      <polygon points="600,150 750,390 680,430 600,400 600,430" fill="#d1d8e0" />
+      <path id="trail" d="M 300 800 L 800 550 L 450 400 L 700 250 L 600 150" fill="none" stroke="#f1c40f" stroke-width="6" stroke-dasharray="15 10" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+
+    <div id="dot-du" class="point player-du"></div>
+    <div id="dot-kom" class="point player-kom"></div>
+
+    <!-- UI: DU (Maximus) -->
+    <div id="dash-du-container" class="dashboard dash-du locked">
+      <div class="dash-title">Maximus Prokrastinatus</div>
+      <div class="stats">
+        Gelesen: <span id="pages-du" class="highlight">0</span> / 458<br>
+        Diese Woche: <span id="week-du">0</span> / 49
+        <div id="beers-du" class="secret-beers"></div>
+      </div>
+      <div class="input-group">
+        <input type="number" id="input-du" min="1" placeholder="Seiten">
+        <button class="btn-add" onclick="addPages('du')">Eintragen</button>
+      </div>
+      <button class="btn-undo" onclick="undo('du')">Letzte Eingabe rückgängig</button>
+    </div>
+
+    <!-- UI: KOMMILITONE (Studicus) -->
+    <div id="dash-kom-container" class="dashboard dash-kom locked">
+      <div class="dash-title">Studicus Suboptimalus</div>
+      <div class="stats">
+        Gelesen: <span id="pages-kom" class="highlight">0</span> / 458<br>
+        Diese Woche: <span id="week-kom">0</span> / 49
+        <div id="beers-kom" class="secret-beers"></div>
+      </div>
+      <div class="input-group">
+        <input type="number" id="input-kom" min="1" placeholder="Seiten">
+        <button class="btn-add" onclick="addPages('kom')">Eintragen</button>
+      </div>
+      <button class="btn-undo" onclick="undo('kom')">Letzte Eingabe rückgängig</button>
+    </div>
+
+    <button class="dev-test-btn" onclick="triggerSunday()">Test: Sonntag simulieren</button>
+
+  </div>
+
+  <!-- FIREBASE IMPORTS & LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7YJd-pkHpHdvz4Ko5ma_-0N8M1AvYihY",
+      authDomain: "climbingwoehe.firebaseapp.com",
+      databaseURL: "https://climbingwoehe-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "climbingwoehe",
+      storageBucket: "climbingwoehe.firefirestorage.app",
+      messagingSenderId: "187028536936",
+      appId: "1:187028536936:web:15aab8de396de2174005dd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const MAX_PAGES = 458;
+    const WEEKLY_GOAL = 49;
+    
+    // Eure PINs (Hier anpassbar)
+    const PINS = {
+      du: "1234",
+      kom: "5678"
+    };
+
+    let currentUser = null;
+
+    window.tryLogin = function() {
+      const selectedUser = document.getElementById('login-user').value;
+      const enteredPin = document.getElementById('login-pin').value;
+      
+      if(enteredPin === PINS[selectedUser]) {
+        currentUser = selectedUser;
+        document.getElementById('login-overlay').style.display = 'none';
+        
+        // Nur das eigene Dashboard entsperren!
+        document.getElementById(`dash-${currentUser}-container`).classList.remove('locked');
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    };
+
+    // Daten live aus der Cloud laden
+    const stateRef = ref(db, 'gameState');
+    onValue(stateRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        updateUI(data);
+      }
+    });
+
+    function updateUI(state) {
+      ['du', 'kom'].forEach(player => {
+        let pData = state[player];
+        let percent = Math.min((pData.pages / MAX_PAGES) * 100, 100);
+        document.getElementById(`dot-${player}`).style.offsetDistance = percent + '%';
+        
+        document.getElementById(`pages-${player}`).innerText = pData.pages;
+        document.getElementById(`week-${player}`).innerText = pData.pages - pData.weekStartPages;
+        document.getElementById(`beers-${player}`).innerText = "🍺".repeat(pData.beers);
+      });
+
+      // Alte Flaggen löschen und neu zeichnen basierend auf der Cloud
+      const container = document.getElementById('mountain');
+      container.querySelectorAll('.player-flag').forEach(el => el.remove());
+
+      if (state.flags) {
+        state.flags.forEach(f => {
+          let flag = document.createElement('div');
+          flag.className = `player-flag flag-${f.player}`;
+          flag.style.offsetDistance = f.percent + '%';
+          if(f.player === 'du') {
+            flag.innerHTML = `🚩<span>${f.sp} SP</span>`;
+          } else {
+            flag.innerHTML = `<span>${f.sp} SP</span>🚩`;
+          }
+          container.appendChild(flag);
+        });
+      }
+    }
+
+    // Grundzustand in Firebase holen / speichern falls leer
+    onValue(stateRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        set(stateRef, {
+          du: { pages: 0, weekStartPages: 0, beers: 0, sp: 0, history: [] },
+          kom: { pages: 0, weekStartPages: 0, beers: 0, sp: 0, history: [] },
+          flags: []
+        });
+      }
+    }, { onlyOnce: true });
+
+    window.addPages = function(player) {
+      if (currentUser !== player) return; // Sicherheits-Check
+
+      const inputEl = document.getElementById(`input-${player}`);
+      const val = parseInt(inputEl.value);
+      if (!val || val <= 0) return;
+
+      onValue(stateRef, (snapshot) => {
+        let state = snapshot.val();
+        state[player].history.push(state[player].pages);
+        state[player].pages = Math.min(state[player].pages + val, MAX_PAGES);
+        inputEl.value = "";
+        
+        set(stateRef, state);
+      }, { onlyOnce: true });
+    };
+
+    window.undo = function(player) {
+      if (currentUser !== player) return;
+
+      onValue(stateRef, (snapshot) => {
+        let state = snapshot.val();
+        if (state[player].history.length > 0) {
+          state[player].pages = state[player].history.pop();
+          set(stateRef, state);
+        }
+      }, { onlyOnce: true });
+    };
+
+    window.triggerSunday = function() {
+      onValue(stateRef, (snapshot) => {
+        let state = snapshot.val();
+        let readDu = state.du.pages - state.du.weekStartPages;
+        let readKom = state.kom.pages - state.kom.weekStartPages;
+
+        if (readDu < WEEKLY_GOAL) state.du.beers += 1;
+        if (readKom < WEEKLY_GOAL) state.kom.beers += 1;
+
+        if (state.du.pages > state.kom.pages) {
+          state.du.sp += 1;
+        } else if (state.kom.pages > state.du.pages) {
+          state.kom.sp += 1;
+        }
+
+        if(!state.flags) state.flags = [];
+        state.flags.push({ player: 'du', sp: state.du.sp, percent: (state.du.pages / MAX_PAGES) * 100 });
+        state.flags.push({ player: 'kom', sp: state.kom.sp, percent: (state.kom.pages / MAX_PAGES) * 100 });
+
+        state.du.weekStartPages = state.du.pages;
+        state.kom.weekStartPages = state.kom.pages;
+
+        set(stateRef, state);
+      }, { onlyOnce: true });
+    };
+
+  </script>
+</body>
+</html>
