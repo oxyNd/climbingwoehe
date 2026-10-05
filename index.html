@@ -211,7 +211,6 @@
     .btn-undo { background: #576574; color: #fff; width: 100%; font-size: 0.9rem; }
     .btn-undo:hover { background: #4b5763; }
 
-    /* Gesperrt-Status für den fremden Bereich */
     .locked input, .locked button { opacity: 0.3; pointer-events: none; }
 
     .dev-test-btn {
@@ -226,7 +225,6 @@
 
   <div class="mobile-warning">Bitte Desktop-Ansicht verwenden (>1250px).</div>
 
-  <!-- LOGIN POPUP -->
   <div id="login-overlay">
     <div class="login-box">
       <h2>Wer bist du?</h2>
@@ -292,11 +290,10 @@
       <button class="btn-undo" onclick="undo('kom')">Letzte Eingabe rückgängig</button>
     </div>
 
-    <button class="dev-test-btn" onclick="triggerSunday()">Test: Sonntag simulieren</button>
+    <button class="dev-test-btn" onclick="secureTriggerSunday()">⚡</button>
 
   </div>
 
-  <!-- FIREBASE IMPORTS & LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -317,7 +314,6 @@
     const MAX_PAGES = 458;
     const WEEKLY_GOAL = 49;
     
-    // Eure PINs (Hier anpassbar)
     const PINS = {
       du: "1234",
       kom: "5678"
@@ -332,15 +328,24 @@
       if(enteredPin === PINS[selectedUser]) {
         currentUser = selectedUser;
         document.getElementById('login-overlay').style.display = 'none';
-        
-        // Nur das eigene Dashboard entsperren!
         document.getElementById(`dash-${currentUser}-container`).classList.remove('locked');
       } else {
         document.getElementById('login-error').style.display = 'block';
       }
     };
 
-    // Daten live aus der Cloud laden
+    // Passwort-Schutz für den Test-Button (Du kannst das Passwort hier unten anpassen: z.B. "admin123")
+    const ADMIN_TEST_PIN = "admin123";
+
+    window.secureTriggerSunday = function() {
+      const entered = prompt("Admin-Passwort für die Wochenabrechnung eingeben:");
+      if (entered === ADMIN_TEST_PIN) {
+        triggerSunday();
+      } else if (entered !== null) {
+        alert("Falsches Passwort!");
+      }
+    };
+
     const stateRef = ref(db, 'gameState');
     onValue(stateRef, (snapshot) => {
       const data = snapshot.val();
@@ -360,7 +365,6 @@
         document.getElementById(`beers-${player}`).innerText = "🍺".repeat(pData.beers);
       });
 
-      // Alte Flaggen löschen und neu zeichnen basierend auf der Cloud
       const container = document.getElementById('mountain');
       container.querySelectorAll('.player-flag').forEach(el => el.remove());
 
@@ -379,7 +383,6 @@
       }
     }
 
-    // Grundzustand in Firebase holen / speichern falls leer
     onValue(stateRef, (snapshot) => {
       if (!snapshot.exists()) {
         set(stateRef, {
@@ -391,7 +394,7 @@
     }, { onlyOnce: true });
 
     window.addPages = function(player) {
-      if (currentUser !== player) return; // Sicherheits-Check
+      if (currentUser !== player) return;
 
       const inputEl = document.getElementById(`input-${player}`);
       const val = parseInt(inputEl.value);
@@ -419,7 +422,7 @@
       }, { onlyOnce: true });
     };
 
-    window.triggerSunday = function() {
+    function triggerSunday() {
       onValue(stateRef, (snapshot) => {
         let state = snapshot.val();
         let readDu = state.du.pages - state.du.weekStartPages;
@@ -442,6 +445,7 @@
         state.kom.weekStartPages = state.kom.pages;
 
         set(stateRef, state);
+        alert("Wochenabrechnung erfolgreich durchgeführt! Flaggen wurden gesetzt.");
       }, { onlyOnce: true });
     };
 
