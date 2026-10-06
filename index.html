@@ -334,7 +334,6 @@
       }
     };
 
-    // Passwort-Schutz für den Test-Button (Du kannst das Passwort hier unten anpassen: z.B. "admin123")
     const ADMIN_TEST_PIN = "admin123";
 
     window.secureTriggerSunday = function() {
@@ -402,11 +401,12 @@
 
       onValue(stateRef, (snapshot) => {
         let state = snapshot.val();
-if (!state[player].history) {
-    state[player].history = [];
-}
-state[player].history.push(state[player].pages);
+        
+        if (!state[player].history) {
+            state[player].history = [];
+        }
         state[player].history.push(state[player].pages);
+
         state[player].pages = Math.min(state[player].pages + val, MAX_PAGES);
         inputEl.value = "";
         
@@ -419,7 +419,7 @@ state[player].history.push(state[player].pages);
 
       onValue(stateRef, (snapshot) => {
         let state = snapshot.val();
-        if (state[player].history.length > 0) {
+        if (state[player].history && state[player].history.length > 0) {
           state[player].pages = state[player].history.pop();
           set(stateRef, state);
         }
