@@ -363,7 +363,11 @@
         document.getElementById(`label-${player}`).innerText = `S. ${pData.pages}`;
         
         document.getElementById(`pages-${player}`).innerText = pData.pages;
-        document.getElementById(`week-${player}`).innerText = Math.max(0, pData.pages - pData.weekStartPages);
+        
+        // Wochenberechnung mit -2 Offset (z.B. Seite 35 - 2 = 33)
+        let weekRead = Math.max(0, (pData.pages - 2) - (pData.weekStartPages - 2));
+        document.getElementById(`week-${player}`).innerText = weekRead;
+        
         document.getElementById(`beers-${player}`).innerText = "🍺".repeat(pData.beers);
       });
     }
@@ -417,8 +421,8 @@
     function triggerSunday() {
       onValue(stateRef, (snapshot) => {
         let state = snapshot.val();
-        let readDu = state.du.pages - state.du.weekStartPages;
-        let readKom = state.kom.pages - state.kom.weekStartPages;
+        let readDu = (state.du.pages - 2) - (state.du.weekStartPages - 2);
+        let readKom = (state.kom.pages - 2) - (state.kom.weekStartPages - 2);
 
         if (readDu < WEEKLY_GOAL) state.du.beers += 1;
         if (readKom < WEEKLY_GOAL) state.kom.beers += 1;
