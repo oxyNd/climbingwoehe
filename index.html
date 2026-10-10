@@ -233,12 +233,12 @@
     <div id="dash-du-container" class="dashboard dash-du locked">
       <div class="dash-title">Maximus Prokrastinatus</div>
       <div class="stats">
-        Aktuelle Seite: <span id="pages-du" class="highlight">3</span> / 459<br>
+        Aktuelle Seite: <span id="pages-du" class="highlight">3</span> / <span class="max-pages-label">461</span><br>
         Diese Woche: <span id="week-du">0</span> / 49
         <div id="beers-du" class="secret-beers"></div>
       </div>
       <div class="input-group">
-        <input type="number" id="input-du" min="3" max="459" placeholder="Akt. Seite">
+        <input type="number" id="input-du" min="3" max="461" placeholder="Akt. Seite">
         <button class="btn-add" onclick="addPages('du')">Speichern</button>
       </div>
       <button class="btn-undo" onclick="undo('du')">Letzte Eingabe rückgängig</button>
@@ -248,12 +248,12 @@
     <div id="dash-kom-container" class="dashboard dash-kom locked">
       <div class="dash-title">Studicus Suboptimalus</div>
       <div class="stats">
-        Aktuelle Seite: <span id="pages-kom" class="highlight">3</span> / 459<br>
+        Aktuelle Seite: <span id="pages-kom" class="highlight">3</span> / <span class="max-pages-label">461</span><br>
         Diese Woche: <span id="week-kom">0</span> / 49
         <div id="beers-kom" class="secret-beers"></div>
       </div>
       <div class="input-group">
-        <input type="number" id="input-kom" min="3" max="459" placeholder="Akt. Seite">
+        <input type="number" id="input-kom" min="3" max="461" placeholder="Akt. Seite">
         <button class="btn-add" onclick="addPages('kom')">Speichern</button>
       </div>
       <button class="btn-undo" onclick="undo('kom')">Letzte Eingabe rückgängig</button>
@@ -280,7 +280,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const MAX_PAGES = 459;
+    const MAX_PAGES = 461;
     const MIN_PAGES = 3;
     const WEEKLY_GOAL = 49;
     
@@ -333,8 +333,9 @@
         document.getElementById(`dot-${player}`).style.offsetDistance = percent + '%';
         document.getElementById(`pages-${player}`).innerText = pData.pages;
         
-        // Exakte Wochenberechnung mit -2 Offset (z.B. Seite 35 - 2 = 33)
-        let weekRead = Math.max(0, (pData.pages - 2) - (pData.weekStartPages - 2));
+        // Exakte Wochenberechnung inklusive Startseite (+1 Korrektur)
+        let weekStart = (pData.weekStartPages < 3) ? 3 : pData.weekStartPages;
+        let weekRead = pData.pages >= weekStart ? (pData.pages - weekStart + 1) : 0;
         document.getElementById(`week-${player}`).innerText = weekRead;
         
         document.getElementById(`beers-${player}`).innerText = "🍺".repeat(pData.beers);
@@ -390,8 +391,12 @@
     function triggerSunday() {
       onValue(stateRef, (snapshot) => {
         let state = snapshot.val();
-        let readDu = (state.du.pages - 2) - (state.du.weekStartPages - 2);
-        let readKom = (state.kom.pages - 2) - (state.kom.weekStartPages - 2);
+        
+        let startDu = state.du.weekStartPages < 3 ? 3 : state.du.weekStartPages;
+        let startKom = state.kom.weekStartPages < 3 ? 3 : state.kom.weekStartPages;
+
+        let readDu = state.du.pages >= startDu ? (state.du.pages - startDu + 1) : 0;
+        let readKom = state.kom.pages >= startKom ? (state.kom.pages - startKom + 1) : 0;
 
         if (readDu < WEEKLY_GOAL) state.du.beers += 1;
         if (readKom < WEEKLY_GOAL) state.kom.beers += 1;
