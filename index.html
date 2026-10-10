@@ -95,56 +95,47 @@
     }
     .login-error { color: #ff4757; font-size: 0.9rem; margin-top: 10px; display: none; }
 
-    /* --- DIE INDIVIDUELLEN FLAGGEN --- */
-    .player-flag {
+    /* --- DIE KLETTER-PUNKTE MIT SEITENZAHL-ANZEIGE --- */
+    .point-wrapper {
       position: absolute;
       top: 0;
       left: 0;
-      z-index: 5;
-      offset-path: path("M 300 800 L 800 550 L 450 400 L 700 250 L 600 150");
-      offset-rotate: 0deg; 
-      font-size: 1.1rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-      white-space: nowrap;
-      pointer-events: none;
-    }
-
-    .player-flag span {
-      font-size: 0.8rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: #fff;
-      font-weight: bold;
-      margin-left: 2px;
-      margin-right: 2px;
-      vertical-align: middle;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-    }
-
-    .flag-du { transform: translate(2px, -100%); }
-    .flag-du span { background: rgba(0, 210, 255, 0.8); box-shadow: 0 0 5px rgba(0, 210, 255, 0.5); }
-
-    .flag-kom { transform: translate(calc(-100% - 2px), -100%); }
-    .flag-kom span { background: rgba(255, 71, 87, 0.8); box-shadow: 0 0 5px rgba(255, 71, 87, 0.5); }
-
-    /* --- DIE KLETTER-PUNKTE --- */
-    .point {
-      width: 22px;
-      height: 22px;
-      border: 3px solid #ffffff;
-      border-radius: 50%;
-      position: absolute;
-      top: 0; left: 0;
       z-index: 10;
       offset-path: path("M 300 800 L 800 550 L 450 400 L 700 250 L 600 150");
       offset-rotate: 0deg;
       transition: offset-distance 1.5s ease-in-out; 
       offset-distance: 0%;
       transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
     }
 
-    .player-du { background-color: #00d2ff; box-shadow: 0 0 15px #00d2ff; margin-top: -3px; }
-    .player-kom { background-color: #ff4757; box-shadow: 0 0 15px #ff4757; margin-top: 3px; }
+    .point {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+    }
+
+    .point-label {
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      white-space: nowrap;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .wrapper-du .point { background-color: #00d2ff; box-shadow: 0 0 15px #00d2ff; }
+    .wrapper-du .point-label { color: #00d2ff; border-color: rgba(0, 210, 255, 0.5); }
+
+    .wrapper-kom .point { background-color: #ff4757; box-shadow: 0 0 15px #ff4757; }
+    .wrapper-kom .point-label { color: #ff4757; border-color: rgba(255, 71, 87, 0.5); }
 
     /* --- UI DASHBOARDS --- */
     .dashboard {
@@ -257,20 +248,27 @@
       <path id="trail" d="M 300 800 L 800 550 L 450 400 L 700 250 L 600 150" fill="none" stroke="#f1c40f" stroke-width="6" stroke-dasharray="15 10" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
 
-    <div id="dot-du" class="point player-du"></div>
-    <div id="dot-kom" class="point player-kom"></div>
+    <!-- Kletterpunkte mit aktueller Seitenzahl direkt darüber -->
+    <div id="wrapper-du" class="point-wrapper wrapper-du">
+      <div id="label-du" class="point-label">S. 3</div>
+      <div class="point"></div>
+    </div>
+    <div id="wrapper-kom" class="point-wrapper wrapper-kom">
+      <div id="label-kom" class="point-label">S. 3</div>
+      <div class="point"></div>
+    </div>
 
     <!-- UI: DU (Maximus) -->
     <div id="dash-du-container" class="dashboard dash-du locked">
       <div class="dash-title">Maximus Prokrastinatus</div>
       <div class="stats">
-        Gelesen: <span id="pages-du" class="highlight">0</span> / 458<br>
+        Aktuelle Seite: <span id="pages-du" class="highlight">3</span> / 459<br>
         Diese Woche: <span id="week-du">0</span> / 49
         <div id="beers-du" class="secret-beers"></div>
       </div>
       <div class="input-group">
-        <input type="number" id="input-du" min="1" placeholder="Seiten">
-        <button class="btn-add" onclick="addPages('du')">Eintragen</button>
+        <input type="number" id="input-du" min="3" max="459" placeholder="Akt. Seite">
+        <button class="btn-add" onclick="addPages('du')">Speichern</button>
       </div>
       <button class="btn-undo" onclick="undo('du')">Letzte Eingabe rückgängig</button>
     </div>
@@ -279,13 +277,13 @@
     <div id="dash-kom-container" class="dashboard dash-kom locked">
       <div class="dash-title">Studicus Suboptimalus</div>
       <div class="stats">
-        Gelesen: <span id="pages-kom" class="highlight">0</span> / 458<br>
+        Aktuelle Seite: <span id="pages-kom" class="highlight">3</span> / 459<br>
         Diese Woche: <span id="week-kom">0</span> / 49
         <div id="beers-kom" class="secret-beers"></div>
       </div>
       <div class="input-group">
-        <input type="number" id="input-kom" min="1" placeholder="Seiten">
-        <button class="btn-add" onclick="addPages('kom')">Eintragen</button>
+        <input type="number" id="input-kom" min="3" max="459" placeholder="Akt. Seite">
+        <button class="btn-add" onclick="addPages('kom')">Speichern</button>
       </div>
       <button class="btn-undo" onclick="undo('kom')">Letzte Eingabe rückgängig</button>
     </div>
@@ -311,7 +309,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const MAX_PAGES = 458;
+    const MAX_PAGES = 459;
+    const MIN_PAGES = 3;
     const WEEKLY_GOAL = 49;
     
     const PINS = {
@@ -356,38 +355,24 @@
     function updateUI(state) {
       ['du', 'kom'].forEach(player => {
         let pData = state[player];
-        let percent = Math.min((pData.pages / MAX_PAGES) * 100, 100);
-        document.getElementById(`dot-${player}`).style.offsetDistance = percent + '%';
+        let effectivePages = Math.max(0, pData.pages - MIN_PAGES);
+        let totalSpan = MAX_PAGES - MIN_PAGES;
+        let percent = Math.min((effectivePages / totalSpan) * 100, 100);
+        
+        document.getElementById(`wrapper-${player}`).style.offsetDistance = percent + '%';
+        document.getElementById(`label-${player}`).innerText = `S. ${pData.pages}`;
         
         document.getElementById(`pages-${player}`).innerText = pData.pages;
-        document.getElementById(`week-${player}`).innerText = pData.pages - pData.weekStartPages;
+        document.getElementById(`week-${player}`).innerText = Math.max(0, pData.pages - pData.weekStartPages);
         document.getElementById(`beers-${player}`).innerText = "🍺".repeat(pData.beers);
       });
-
-      const container = document.getElementById('mountain');
-      container.querySelectorAll('.player-flag').forEach(el => el.remove());
-
-      if (state.flags) {
-        state.flags.forEach(f => {
-          let flag = document.createElement('div');
-          flag.className = `player-flag flag-${f.player}`;
-          flag.style.offsetDistance = f.percent + '%';
-          if(f.player === 'du') {
-            flag.innerHTML = `🚩<span>${f.sp} SP</span>`;
-          } else {
-            flag.innerHTML = `<span>${f.sp} SP</span>🚩`;
-          }
-          container.appendChild(flag);
-        });
-      }
     }
 
     onValue(stateRef, (snapshot) => {
       if (!snapshot.exists()) {
         set(stateRef, {
-          du: { pages: 0, weekStartPages: 0, beers: 0, sp: 0, history: [] },
-          kom: { pages: 0, weekStartPages: 0, beers: 0, sp: 0, history: [] },
-          flags: []
+          du: { pages: 3, weekStartPages: 3, beers: 0, history: [] },
+          kom: { pages: 3, weekStartPages: 3, beers: 0, history: [] }
         });
       }
     }, { onlyOnce: true });
@@ -397,7 +382,10 @@
 
       const inputEl = document.getElementById(`input-${player}`);
       const val = parseInt(inputEl.value);
-      if (!val || val <= 0) return;
+      if (isNaN(val) || val < MIN_PAGES || val > MAX_PAGES) {
+        alert(`Bitte eine Seitenzahl zwischen ${MIN_PAGES} und ${MAX_PAGES} eingeben!`);
+        return;
+      }
 
       onValue(stateRef, (snapshot) => {
         let state = snapshot.val();
@@ -407,7 +395,7 @@
         }
         state[player].history.push(state[player].pages);
 
-        state[player].pages = Math.min(state[player].pages + val, MAX_PAGES);
+        state[player].pages = val;
         inputEl.value = "";
         
         set(stateRef, state);
@@ -435,21 +423,11 @@
         if (readDu < WEEKLY_GOAL) state.du.beers += 1;
         if (readKom < WEEKLY_GOAL) state.kom.beers += 1;
 
-        if (state.du.pages > state.kom.pages) {
-          state.du.sp += 1;
-        } else if (state.kom.pages > state.du.pages) {
-          state.kom.sp += 1;
-        }
-
-        if(!state.flags) state.flags = [];
-        state.flags.push({ player: 'du', sp: state.du.sp, percent: (state.du.pages / MAX_PAGES) * 100 });
-        state.flags.push({ player: 'kom', sp: state.kom.sp, percent: (state.kom.pages / MAX_PAGES) * 100 });
-
         state.du.weekStartPages = state.du.pages;
         state.kom.weekStartPages = state.kom.pages;
 
         set(stateRef, state);
-        alert("Wochenabrechnung erfolgreich durchgeführt! Flaggen wurden gesetzt.");
+        alert("Wochenabrechnung erfolgreich durchgeführt! Bier-Strafen (falls nötig) verteilt.");
       }, { onlyOnce: true });
     };
 
