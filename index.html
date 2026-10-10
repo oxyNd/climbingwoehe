@@ -95,7 +95,7 @@
     }
     .login-error { color: #ff4757; font-size: 0.9rem; margin-top: 10px; display: none; }
 
-    /* --- DIE KLETTER-PUNKTE (Ohne Beschriftung) --- */
+    /* --- DIE KLETTER-PUNKTE --- */
     .point {
       width: 22px;
       height: 22px;
@@ -331,10 +331,9 @@
         let percent = Math.min((effectivePages / totalSpan) * 100, 100);
         
         document.getElementById(`dot-${player}`).style.offsetDistance = percent + '%';
-        
         document.getElementById(`pages-${player}`).innerText = pData.pages;
         
-        // Wochenberechnung mit -2 Offset (z.B. Seite 35 - 2 = 33)
+        // Exakte Wochenberechnung mit -2 Offset (z.B. Seite 35 - 2 = 33)
         let weekRead = Math.max(0, (pData.pages - 2) - (pData.weekStartPages - 2));
         document.getElementById(`week-${player}`).innerText = weekRead;
         
