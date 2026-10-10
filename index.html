@@ -95,47 +95,24 @@
     }
     .login-error { color: #ff4757; font-size: 0.9rem; margin-top: 10px; display: none; }
 
-    /* --- DIE KLETTER-PUNKTE MIT SEITENZAHL-ANZEIGE --- */
-    .point-wrapper {
+    /* --- DIE KLETTER-PUNKTE (Ohne Beschriftung) --- */
+    .point {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       z-index: 10;
       offset-path: path("M 300 800 L 800 550 L 450 400 L 700 250 L 600 150");
       offset-rotate: 0deg;
       transition: offset-distance 1.5s ease-in-out; 
       offset-distance: 0%;
       transform: translate(-50%, -50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      pointer-events: none;
     }
 
-    .point {
-      width: 22px;
-      height: 22px;
-      border: 3px solid #ffffff;
-      border-radius: 50%;
-    }
-
-    .point-label {
-      font-size: 0.75rem;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(0, 0, 0, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      white-space: nowrap;
-      margin-bottom: 4px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    }
-
-    .wrapper-du .point { background-color: #00d2ff; box-shadow: 0 0 15px #00d2ff; }
-    .wrapper-du .point-label { color: #00d2ff; border-color: rgba(0, 210, 255, 0.5); }
-
-    .wrapper-kom .point { background-color: #ff4757; box-shadow: 0 0 15px #ff4757; }
-    .wrapper-kom .point-label { color: #ff4757; border-color: rgba(255, 71, 87, 0.5); }
+    .player-du { background-color: #00d2ff; box-shadow: 0 0 15px #00d2ff; margin-top: -3px; }
+    .player-kom { background-color: #ff4757; box-shadow: 0 0 15px #ff4757; margin-top: 3px; }
 
     /* --- UI DASHBOARDS --- */
     .dashboard {
@@ -248,15 +225,9 @@
       <path id="trail" d="M 300 800 L 800 550 L 450 400 L 700 250 L 600 150" fill="none" stroke="#f1c40f" stroke-width="6" stroke-dasharray="15 10" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
 
-    <!-- Kletterpunkte mit aktueller Seitenzahl direkt darüber -->
-    <div id="wrapper-du" class="point-wrapper wrapper-du">
-      <div id="label-du" class="point-label">S. 3</div>
-      <div class="point"></div>
-    </div>
-    <div id="wrapper-kom" class="point-wrapper wrapper-kom">
-      <div id="label-kom" class="point-label">S. 3</div>
-      <div class="point"></div>
-    </div>
+    <!-- Reine Kletterpunkte ohne Beschriftung -->
+    <div id="dot-du" class="point player-du"></div>
+    <div id="dot-kom" class="point player-kom"></div>
 
     <!-- UI: DU (Maximus) -->
     <div id="dash-du-container" class="dashboard dash-du locked">
@@ -359,8 +330,7 @@
         let totalSpan = MAX_PAGES - MIN_PAGES;
         let percent = Math.min((effectivePages / totalSpan) * 100, 100);
         
-        document.getElementById(`wrapper-${player}`).style.offsetDistance = percent + '%';
-        document.getElementById(`label-${player}`).innerText = `S. ${pData.pages}`;
+        document.getElementById(`dot-${player}`).style.offsetDistance = percent + '%';
         
         document.getElementById(`pages-${player}`).innerText = pData.pages;
         
